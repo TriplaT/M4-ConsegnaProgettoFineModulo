@@ -8,6 +8,11 @@ public class Projectile : MonoBehaviour
 
     private Vector3 direction;
 
+    public void SetDamage(float newDamage)
+    {
+        damage = Mathf.RoundToInt(newDamage);
+    }
+
     void Start()
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -17,7 +22,7 @@ public class Projectile : MonoBehaviour
         }
         else
         {
-            direction = transform.forward; 
+            direction = transform.forward;
         }
 
         Destroy(gameObject, lifeTime);
@@ -30,7 +35,6 @@ public class Projectile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-
         if (other.CompareTag("Player"))
         {
             HealthManager health = other.GetComponentInParent<HealthManager>();
@@ -42,8 +46,4 @@ public class Projectile : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
-
-
-
 }

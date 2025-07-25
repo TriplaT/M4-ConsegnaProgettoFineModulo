@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 
 public class MovingPlatform : MonoBehaviour
@@ -7,33 +6,35 @@ public class MovingPlatform : MonoBehaviour
     [SerializeField] private int startingPoint = 0;
     [SerializeField] private Transform[] points;
 
-    private int i;
+    private int currentPointIndex;
 
     private void Start()
     {
-        if (points.Length == 0)
+        if (points == null || points.Length == 0)
         {
-            Debug.LogError("Nessun punto assegnato alla piattaforma.");
+            Debug.LogError("MovingPlatform: nessun punto assegnato!");
             enabled = false;
             return;
         }
 
-        transform.position = points[startingPoint].position;
-        i = startingPoint;
+        if (startingPoint < 0 || startingPoint >= points.Length)
+        {
+            Debug.LogWarning("MovingPlatform: startingPoint fuori range, imposto a 0.");
+            startingPoint = 0;
+        }
+
+        currentPointIndex = startingPoint;
+        transform.position = points[currentPointIndex].position;
     }
 
     private void Update()
     {
-        if (Vector3.Distance(transform.position, points[i].position) < 0.02f)
+        if (Vector3.Distance(transform.position, points[currentPointIndex].position) < 0.02f)
         {
-            i++;
-            if (i >= points.Length)
-            {
-                i = 0;
-            }
+            currentPointIndex = (currentPointIndex + 1) % points.Length;
         }
 
-        transform.position = Vector3.MoveTowards(transform.position, points[i].position, speed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, points[currentPointIndex].position, speed * Time.deltaTime);
     }
 
     private void OnCollisionEnter(Collision collision)

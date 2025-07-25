@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class Timer : MonoBehaviour
 {
-    [SerializeField] TextMeshProUGUI timerText;
+    [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private float remainingTime = 60f;
 
     [Header("Lose Panel Stuff")]
@@ -16,55 +16,90 @@ public class Timer : MonoBehaviour
     [SerializeField] private Button exitButton;
 
     [Header("Player")]
-    [SerializeField] private GameObject playerObject; 
+    [SerializeField] private GameObject playerObject;
 
     private bool hasEnded = false;
 
     void Start()
     {
-        retryButton.onClick.AddListener(RetryLevel);
-        exitButton.onClick.AddListener(ExitToMenu);
+        if (retryButton != null)
+            retryButton.onClick.AddListener(RetryLevel);
+        else
+            Debug.LogWarning("Timer: retryButton non assegnato!");
+
+        if (exitButton != null)
+            exitButton.onClick.AddListener(ExitToMenu);
+        else
+            Debug.LogWarning("Timer: exitButton non assegnato!");
+
+        if (losePanel != null)
+            losePanel.SetActive(false);
+        else
+            Debug.LogWarning("Timer: losePanel non assegnato!");
+
+        if (timerText == null)
+            Debug.LogWarning("Timer: timerText non assegnato!");
     }
 
     void Update()
     {
-        if (hasEnded) return;
+        if (hasEnded)
+            return;
 
-        if (remainingTime > 0)
+        if (remainingTime > 0f)
         {
             remainingTime -= Time.deltaTime;
-
-            int minutes = Mathf.FloorToInt(remainingTime / 60F);
-            int seconds = Mathf.FloorToInt(remainingTime % 60);
-            timerText.text = string.Format("{0:0}:{1:00}", minutes, seconds);
+            UpdateTimerUI(remainingTime);
         }
         else
         {
-            remainingTime = 0;
+            remainingTime = 0f;
             EndLevelCheck();
         }
     }
 
+    private void UpdateTimerUI(float time)
+    {
+        if (timerText == null)
+            return;
+
+        int minutes = Mathf.FloorToInt(time / 60f);
+        int seconds = Mathf.FloorToInt(time % 60f);
+        timerText.text = string.Format("{0:0}:{1:00}", minutes, seconds);
+    }
+
     private void EndLevelCheck()
     {
+        if (hasEnded)
+            return;
+
         hasEnded = true;
+
+        if (playerObject == null)
+        {
+            Debug.LogError("Timer: playerObject non assegnato!");
+            return;
+        }
 
         CoinCollection coinScript = playerObject.GetComponent<CoinCollection>();
         int coinsCollected = coinScript != null ? coinScript.GetCoinCount() : 0;
 
-        if (coinsCollected <= coinsNeeded)
+        if (coinsCollected < coinsNeeded)
         {
-            Debug.Log("Tempo scaduto! Non abbastanza coin. Game Over.");
+            Debug.Log("Tempo scaduto! Non abbastanza monete. Game Over.");
 
-            losePanel.SetActive(true);
+            if (losePanel != null)
+                losePanel.SetActive(true);
+
             if (coinCollectedText != null)
                 coinCollectedText.text = "Monete: " + coinsCollected;
 
-            if (playerObject.TryGetComponent(out ThirdPersonMovement pc))
-            {
+            if (playerObject.TryGetComponent<ThirdPersonMovement>(out var pc))
                 pc.enabled = false;
-            }
         }
+        else
+        {
+            Debug.Log("Tempo scaduto! Obiettivo monete raggiunto! Hai quasi vinto!");        }
     }
 
     private void RetryLevel()

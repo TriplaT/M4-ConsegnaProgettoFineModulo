@@ -2,33 +2,42 @@ using UnityEngine;
 
 public class HealthBarUI : MonoBehaviour
 {
-    public RectTransform fill;
+    [SerializeField] private RectTransform fill;
 
-    private float maxWidth = 0f;
+    private float maxWidth;
 
-    void Start()
+    void Awake()
     {
-        if (fill != null)
-            maxWidth = fill.sizeDelta.x;
+        if (fill == null)
+        {
+            Debug.LogError("HealthBarUI: 'fill' RectTransform non assegnato!");
+            enabled = false; 
+            return;
+        }
+        maxWidth = fill.sizeDelta.x;
     }
 
     public void SetHealth(float current, float max)
     {
-        if (maxWidth == 0f && fill != null)
+        if (max <= 0f)
         {
-            maxWidth = fill.sizeDelta.x;
+            Debug.LogWarning("HealthBarUI: max health <= 0, salto aggiornamento.");
+            return;
         }
 
-        float width = (current / max) * maxWidth;
-        fill.sizeDelta = new Vector2(width, fill.sizeDelta.y);
+        float normalized = Mathf.Clamp01(current / max);
+        UpdateFillWidth(normalized);
     }
 
-    public void SetHealth(float current)
+    public void SetHealthNormalized(float normalizedValue)
     {
-        fill.sizeDelta = new Vector2(current, fill.sizeDelta.y);
+        normalizedValue = Mathf.Clamp01(normalizedValue);
+        UpdateFillWidth(normalizedValue);
     }
-    public void SetMaxHealth(float max)
+
+    private void UpdateFillWidth(float normalizedValue)
     {
-        fill.sizeDelta = new Vector2(max, fill.sizeDelta.y);
+        float width = maxWidth * normalizedValue;
+        fill.sizeDelta = new Vector2(width, fill.sizeDelta.y);
     }
 }

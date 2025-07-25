@@ -1,28 +1,39 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class CoinCollection : MonoBehaviour
 {
     private int coinCount = 0;
-    public TextMeshProUGUI coinText;
+
+    [SerializeField] private TextMeshProUGUI coinText;
+
+    private void Start()
+    {
+        if (coinText == null)
+            Debug.LogWarning("CoinCollection: coinText non assegnato!");
+        else
+            UpdateCoinUI();
+    }
 
     private void OnTriggerEnter(Collider other)
     {
-        // Controlla se l'oggetto ha il tag "Coin"
         if (other.CompareTag("Coin"))
         {
             coinCount++;
-            coinText.text = "Coin Collected: " + coinCount.ToString();
-            Debug.Log(coinCount);
+            UpdateCoinUI();
+            Debug.Log($"Monete raccolte: {coinCount}");
             Destroy(other.gameObject);
         }
+    }
+
+    private void UpdateCoinUI()
+    {
+        if (coinText != null)
+            coinText.text = "Coin Collected: " + coinCount;
     }
 
     public int GetCoinCount()
     {
         return coinCount;
     }
-
 }

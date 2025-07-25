@@ -1,34 +1,44 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerManager : MonoBehaviour
 {
-    [SerializeField] private float Health, Maxhealth;
+    [SerializeField] private float health;
+    [SerializeField] private float maxHealth = 100f;
     [SerializeField] private HealthBarUI healthBar;
-    // Start is called before the first frame update
+
     void Start()
     {
-        healthBar.SetMaxHealth(Maxhealth);
+        health = maxHealth;
+        UpdateHealthBar();
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyDown("d"))
         {
-            SetHealth(-20f);
+            ChangeHealth(-20f);
         }
-        if (Input.GetKeyDown("h"))
+        else if (Input.GetKeyDown("h"))
         {
-            SetHealth(20f);
+            ChangeHealth(20f);
         }
     }
 
-    public void SetHealth(float healthChange)
+    public void ChangeHealth(float delta)
     {
-        Health += healthChange;
-        Health = Mathf.Clamp(Health, 0, Maxhealth);
-        healthBar.SetHealth(Health);
+        health = Mathf.Clamp(health + delta, 0, maxHealth);
+        UpdateHealthBar();
+    }
+
+    private void UpdateHealthBar()
+    {
+        if (healthBar != null)
+        {
+            healthBar.SetHealth(health, maxHealth);
+        }
+        else
+        {
+            Debug.LogWarning("PlayerManager: healthBar non assegnata");
+        }
     }
 }
